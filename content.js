@@ -23,6 +23,75 @@ function requestTranslation(text) {
   });
 }
 
+// ---------- Motore integrato: API Translator di Chrome (138+) ----------
+// Le API built-in non esistono nei service worker: girano qui, nel content script.
+const BUILTIN_LANG_MAP = { "zh-CN": "zh", "zh-TW": "zh-Hant" };
+const translatorCache = new Map(); // "src->tgt" -> Promise<Translator>
+
+function builtinSupported() {
+  return "Translator" in self;
+}
+
+function getTargetLang() {
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage({ type: "QT_GET_TARGET_LANG" }, (res) => {
+      resolve((res && res.targetLang) || "it");
+    });
+  });
+}
+
+let sharedDetector = null;
+
+async function detectSourceLanguage(text) {
+  if (!("LanguageDetector" in self)) return "en";
+  try {
+    if (!sharedDetector) sharedDetector = await LanguageDetector.create();
+    const results = await sharedDetector.detect(text.slice(0, 512));
+    if (results.length > 0 && results[0].detectedLanguage) {
+      return results[0].detectedLanguage;
+    }
+  } catch (e) {
+    // rilevamento non disponibile: assume 'en'
+  }
+  return "en";
+}
+
+async function getTranslator(sourceLang, targetLang) {
+  const key = sourceLang + "->" + targetLang;
+  let pending = translatorCache.get(key);
+  if (!pending) {
+    pending = Translator.create({ sourceLanguage: sourceLang, targetLanguage: targetLang });
+    translatorCache.set(key, pending);
+    pending.catch(() => translatorCache.delete(key));
+  }
+  return pending;
+}
+
+async function translateWithBuiltin(text, targetLang) {
+  if (!builtinSupported()) throw new Error("Translator API non disponibile");
+
+  const tgt = BUILTIN_LANG_MAP[targetLang] || targetLang;
+  const src = await detectSourceLanguage(text);
+
+  const availability = await Translator.availability({ sourceLanguage: src, targetLanguage: tgt });
+  if (availability === "unavailable") {
+    throw new Error("Coppia di lingue non supportata: " + src + " -> " + tgt);
+  }
+
+  const translator = await getTranslator(src, tgt);
+  return translator.translate(text);
+}
+
+// Punto di ingresso unico: motore integrato, con fallback sull'endpoint remoto
+// (Chrome < 138, coppie non supportate, download del modello non riuscito, ecc.).
+async function translateText(text, targetLang) {
+  try {
+    return await translateWithBuiltin(text, targetLang);
+  } catch (builtinErr) {
+    return requestTranslation(text);
+  }
+}
+
 // ---------- Popup fluttuante per la selezione ----------
 let floatingBox = null;
 
@@ -117,7 +186,8 @@ async function translateSelectionText(text) {
   showFloatingBox(rect, text, "Traduzione in corso…", false);
 
   try {
-    const translated = await requestTranslation(text);
+    const targetLang = await getTargetLang();
+    const translated = await translateText(text, targetLang);
     showFloatingBox(rect, text, translated, false);
   } catch (err) {
     showFloatingBox(rect, text, "Errore: " + err.message, true);
@@ -177,13 +247,13 @@ function chunkNodes(nodes) {
   return chunks;
 }
 
-async function translateChunk(nodes) {
+async function translateChunk(nodes, targetLang) {
   const originalTexts = nodes.map((n) => n.nodeValue);
   const joined = originalTexts.join(NODE_SEP);
 
   let translatedJoined;
   try {
-    translatedJoined = await requestTranslation(joined);
+    translatedJoined = await translateText(joined, targetLang);
   } catch (err) {
     return; // lascia il chunk intatto in caso di errore
   }
@@ -200,7 +270,7 @@ async function translateChunk(nodes) {
     // Il numero di righe non combacia: traduci nodo per nodo (più lento ma sicuro)
     for (const node of nodes) {
       try {
-        const t = await requestTranslation(node.nodeValue);
+        const t = await translateText(node.nodeValue, targetLang);
         if (!node[ORIGINAL_ATTR]) node[ORIGINAL_ATTR] = node.nodeValue;
         node.nodeValue = t;
       } catch (e) {
@@ -211,11 +281,12 @@ async function translateChunk(nodes) {
 }
 
 async function translateFullPage() {
+  const targetLang = await getTargetLang();
   const nodes = collectTextNodes(document.body);
   const chunks = chunkNodes(nodes);
 
   for (const chunk of chunks) {
-    await translateChunk(chunk);
+    await translateChunk(chunk, targetLang);
   }
 
   fullPageTranslated = true;
