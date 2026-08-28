@@ -35,12 +35,28 @@ quoted as they appear on screen.
   - `Ctrl+Shift+U` (`Cmd+Shift+U` on Mac): translate the whole page
   - `Ctrl+Shift+O` (`Cmd+Shift+O` on Mac): restore the original page
 
+## Project structure
+
+```
+quick-translate/
+├── manifest.json      Extension manifest (Manifest V3)
+├── src/
+│   ├── background.js  Service worker: context menus, shortcuts, translation calls
+│   ├── content.js     Injected in every page: selection popup, full page translation
+│   ├── content.css    Styles for the floating popup and the page toast
+│   ├── popup.html     Toolbar popup UI
+│   └── popup.js       Toolbar popup logic
+├── icons/
+├── PRIVACY.md
+└── CHANGELOG.md
+```
+
 ## Technical notes
 
 - No API key required: it uses the public `dt=t` endpoint of Google
   Translate. This is not an officially supported use of Google services.
   For a production project it is better to switch to the Cloud Translation
-  API or DeepL (just replace `translateRaw()` in `background.js`).
+  API or DeepL (just replace `translateRaw()` in `src/background.js`).
 - Full page translation groups text nodes into blocks (about 1600
   characters) joined by `\n` to reduce the number of requests; if the
   number of translated lines does not match the original, the block is
@@ -58,3 +74,8 @@ quoted as they appear on screen.
 - Very dynamic pages (SPAs with continuous re-rendering) may need a new
   translation after route changes, since there is no active
   `MutationObserver` in this v1.
+
+## Privacy
+
+See [PRIVACY.md](PRIVACY.md) for what data leaves the browser and where it
+goes.

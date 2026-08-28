@@ -1,2 +1,7 @@
 .qwen
 .claude
+.jj
+
+.DS_Store
+*.swp
+*.zip

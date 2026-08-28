@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Quick Translate",
-  "version": "1.0.0",
-  "description": "Traduzione al volo del testo selezionato e dell'intera pagina, tramite Google Translate.",
+  "version": "1.0.1",
+  "description": "Instant translation, through Google Translate's unofficial API",
   "author": "Alberto Barrago",
   "permissions": ["activeTab", "scripting", "storage", "contextMenus"],
   "host_permissions": [
     "https://translate.googleapis.com/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background.js"
   },
   "icons": {
     "16": "icons/icon16.png",
@@ -18,7 +18,7 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "src/popup.html",
     "default_title": "Quick Translate",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -44,8 +44,8 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["content.css"],
+      "js": ["src/content.js"],
+      "css": ["src/content.css"],
       "run_at": "document_idle"
     }
   ]

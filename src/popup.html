@@ -52,6 +52,18 @@
     opacity: 0.55;
     margin-top: 8px;
   }
+  #status {
+    display: none;
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+  #status.status-visible {
+    display: block;
+  }
+  #status.status-error {
+    color: #ff8a8a;
+    opacity: 0.9;
+  }
   .shortcuts {
     margin-top: 12px;
     border-top: 1px solid #333;
@@ -111,6 +123,8 @@
 
   <button id="translatePage">Traduci pagina intera</button>
   <button id="restorePage" class="secondary">Ripristina originale</button>
+
+  <div id="status" class="hint"></div>
 
   <div class="hint">
     Seleziona del testo in pagina e usa il tasto destro → "Traduci selezione".
