@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<title>Quick Translate</title>
+<style>
+  body {
+    width: 240px;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 14px;
+    background: #1e1e1e;
+    color: #f2f2f2;
+  }
+  h1 {
+    font-size: 14px;
+    margin: 0 0 12px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+  select {
+    width: 100%;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #2a2a2a;
+    color: #f2f2f2;
+    margin-bottom: 12px;
+  }
+  button {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    background: #3b82f6;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+  button.secondary {
+    background: #333;
+  }
+  button:hover {
+    opacity: 0.9;
+  }
+  .hint {
+    font-size: 11px;
+    opacity: 0.55;
+    margin-top: 8px;
+  }
+  .shortcuts {
+    margin-top: 12px;
+    border-top: 1px solid #333;
+    padding-top: 10px;
+  }
+  .shortcuts h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.55;
+    margin: 0 0 6px;
+    font-weight: 600;
+  }
+  .shortcut-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    padding: 3px 0;
+  }
+  .shortcut-key {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: monospace;
+    font-size: 11px;
+    opacity: 0.9;
+  }
+  .shortcut-key.unset {
+    opacity: 0.5;
+    font-style: italic;
+  }
+  #editShortcuts {
+    background: none;
+    border: 1px solid #444;
+    color: #ccc;
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+</style>
+</head>
+<body>
+  <h1>Quick Translate</h1>
+
+  <label for="lang">Lingua di destinazione</label>
+  <select id="lang">
+    <option value="it">Italiano</option>
+    <option value="en">Inglese</option>
+    <option value="es">Spagnolo</option>
+    <option value="fr">Francese</option>
+    <option value="de">Tedesco</option>
+    <option value="pt">Portoghese</option>
+    <option value="ja">Giapponese</option>
+    <option value="zh-CN">Cinese (semplificato)</option>
+  </select>
+
+  <button id="translatePage">Traduci pagina intera</button>
+  <button id="restorePage" class="secondary">Ripristina originale</button>
+
+  <div class="hint">
+    Seleziona del testo in pagina e usa il tasto destro → "Traduci selezione".
+  </div>
+
+  <div class="shortcuts">
+    <h2>Scorciatoie da tastiera</h2>
+    <div id="shortcutsList"></div>
+    <button id="editShortcuts">Modifica scorciatoie</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
