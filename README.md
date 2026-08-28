@@ -1,7 +1,5 @@
 # Quick Translate
 
-Autore: **Alberto Barrago** ([albz.it](https://albz.it))
-
 Estensione Manifest V3 (Chromium / Helium) per traduzione al volo del testo
 selezionato e traduzione dell'intera pagina, tramite l'endpoint pubblico
 (non ufficiale) `translate.googleapis.com`.
