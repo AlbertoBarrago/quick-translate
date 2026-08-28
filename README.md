@@ -1,54 +1,60 @@
 # Quick Translate
 
-Estensione Manifest V3 (Chromium / Helium) per traduzione al volo del testo
-selezionato e traduzione dell'intera pagina, tramite l'endpoint pubblico
-(non ufficiale) `translate.googleapis.com`.
+A Manifest V3 extension (Chromium / Helium) for on the fly translation of
+selected text and full page translation, using the public (unofficial)
+`translate.googleapis.com` endpoint.
 
-## Installazione (dev, non pacchettizzata)
+## Installation (dev, unpacked)
 
-1. Apri `chrome://extensions` (funziona identico in Helium).
-2. Attiva "Modalità sviluppatore" in alto a destra.
-3. Clicca "Carica estensione non pacchettizzata" e seleziona questa cartella.
-4. L'icona comparirà nella toolbar.
+1. Open `chrome://extensions` (works the same in Helium).
+2. Turn on "Developer mode" in the top right corner.
+3. Click "Load unpacked" and select this folder.
+4. The icon will appear in the toolbar.
 
-## Uso
+## Usage
 
-- **Traduzione selezione**: seleziona del testo → tasto destro →
-  "Traduci selezione". Compare un popup con originale e traduzione.
-- **Traduzione pagina intera**: tasto destro sulla pagina → "Traduci pagina
-  intera", oppure apri il popup dell'estensione e clicca il bottone
-  corrispondente.
-- **Ripristino**: tasto destro → "Ripristina pagina originale" (o bottone nel
-  popup) per tornare al testo originale, senza ricaricare la pagina.
-- **Lingua target**: impostabile dal popup della toolbar (salvata in
-  `chrome.storage.sync`, default `it`).
-- **Scorciatoie da tastiera**: visibili nel popup della toolbar, sotto
-  "Scorciatoie da tastiera". Default suggeriti (personalizzabili da
-  `chrome://extensions/shortcuts`, link diretto anche dal popup):
-  - `Ctrl+Shift+Y` (`Cmd+Shift+Y` su Mac): traduci il testo selezionato
-  - `Ctrl+Shift+U` (`Cmd+Shift+U` su Mac): traduci l'intera pagina
-  - `Ctrl+Shift+O` (`Cmd+Shift+O` su Mac): ripristina l'originale
+The extension UI (menus and popup) is in Italian, so the labels below are
+quoted as they appear on screen.
 
-## Note tecniche
+- **Translate selection**: select some text, then right click and choose
+  "Traduci selezione" (Translate selection). A popup appears with the
+  original text and the translation.
+- **Full page translation**: right click on the page and choose
+  "Traduci pagina intera" (Translate whole page), or open the extension
+  popup and click the matching button.
+- **Restore**: right click and choose "Ripristina pagina originale"
+  (Restore original page), or use the button in the popup, to go back to
+  the original text without reloading the page.
+- **Target language**: set from the toolbar popup (stored in
+  `chrome.storage.sync`, defaults to `it`).
+- **Keyboard shortcuts**: visible in the toolbar popup, under
+  "Scorciatoie da tastiera" (Keyboard shortcuts). Suggested defaults
+  (customizable from `chrome://extensions/shortcuts`, also linked directly
+  from the popup):
+  - `Ctrl+Shift+Y` (`Cmd+Shift+Y` on Mac): translate the selected text
+  - `Ctrl+Shift+U` (`Cmd+Shift+U` on Mac): translate the whole page
+  - `Ctrl+Shift+O` (`Cmd+Shift+O` on Mac): restore the original page
 
-- Nessuna API key richiesta: usa l'endpoint pubblico `dt=t` di Google
-  Translate. Non è un uso ufficialmente supportato da Google — per un
-  progetto da produzione conviene passare a Cloud Translation API o DeepL
-  (basta sostituire `translateRaw()` in `background.js`).
-- La traduzione della pagina intera raggruppa i nodi di testo in blocchi
-  (~1600 caratteri) uniti da `\n`, per ridurre il numero di richieste; se il
-  numero di righe tradotte non combacia con l'originale, il blocco viene
-  ritradotto nodo per nodo come fallback.
-- Vengono esclusi `script`, `style`, `noscript`, `textarea`, `input`, `code`,
-  `pre` e gli elementi `contenteditable`.
-- Permessi richiesti volutamente minimi: niente `<all_urls>` nei permessi (i
-  content script sono dichiarati via `content_scripts`, il fetch verso
-  Google Translate è isolato in `host_permissions`).
+## Technical notes
 
-## Limiti noti
+- No API key required: it uses the public `dt=t` endpoint of Google
+  Translate. This is not an officially supported use of Google services.
+  For a production project it is better to switch to the Cloud Translation
+  API or DeepL (just replace `translateRaw()` in `background.js`).
+- Full page translation groups text nodes into blocks (about 1600
+  characters) joined by `\n` to reduce the number of requests; if the
+  number of translated lines does not match the original, the block is
+  retranslated node by node as a fallback.
+- `script`, `style`, `noscript`, `textarea`, `input`, `code`, `pre` and
+  `contenteditable` elements are excluded.
+- Permissions are kept minimal on purpose: no `<all_urls>` in the
+  permissions (content scripts are declared via `content_scripts`, and the
+  fetch to Google Translate is isolated in `host_permissions`).
 
-- L'endpoint pubblico non garantisce SLA né rate limit documentati: uso
-  intenso può risultare in blocchi temporanei da parte di Google.
-- Pagine molto dinamiche (SPA con re-render continuo) possono richiedere una
-  nuova traduzione dopo cambi di route, dato che non c'è un
-  `MutationObserver` attivo in questa v1.
+## Known limitations
+
+- The public endpoint comes with no SLA and no documented rate limits:
+  heavy use can result in temporary blocks by Google.
+- Very dynamic pages (SPAs with continuous re-rendering) may need a new
+  translation after route changes, since there is no active
+  `MutationObserver` in this v1.
